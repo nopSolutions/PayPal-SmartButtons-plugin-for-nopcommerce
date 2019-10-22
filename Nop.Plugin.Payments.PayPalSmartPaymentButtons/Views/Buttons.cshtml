@@ -1,0 +1,37 @@
+﻿@model string
+
+@if (Model.Equals(PublicWidgetZones.OrderSummaryContentAfter))
+{
+    <script asp-location="Footer">
+        $(document).ready(function() {
+            $('#checkout').after('<div id="paypal-button-container"></div>');
+            $('#checkout').hide();
+        });
+    </script>
+}
+
+@if (Model.Equals(PublicWidgetZones.ProductDetailsAddInfo))
+{
+    <div id="paypal-button-container"></div>
+}
+
+<script asp-location="Footer">
+    $(document).ready(function() {
+        var paymentForm = paypal.Buttons({
+            onClick: function (e, n) {
+                window.location = '@Url.RouteUrl("Checkout")';
+                return false;
+            },
+            style: {
+                layout: '@settings.StyleLayout',
+                color: '@settings.StyleColor',
+                shape: '@settings.StyleShape',
+                label: '@settings.StyleLabel',
+                tagline: '@settings.StyleTagline'
+            }
+        });
+        if (paymentForm) {
+            paymentForm.render('#paypal-button-container');
+        }
+    });
+</script>
