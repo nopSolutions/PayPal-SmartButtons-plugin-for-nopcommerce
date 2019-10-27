@@ -1,6 +1,6 @@
-﻿@model string
+﻿@model (string WidgetZone, int ProductId)
 
-@if (Model.Equals(PublicWidgetZones.OrderSummaryContentAfter))
+@if (Model.WidgetZone.Equals(PublicWidgetZones.OrderSummaryContentAfter))
 {
     <script asp-location="Footer">
         $(document).ready(function() {
@@ -10,10 +10,10 @@
     </script>
 }
 
-@if (Model.Equals(PublicWidgetZones.ProductDetailsAddInfo))
+@if (Model.WidgetZone.Equals(PublicWidgetZones.ProductDetailsAddInfo))
 {
     <div>
-        <div class="add-to-cart-panel" id="paypal-button-container"></div>
+        <div class="add-to-cart-panel" id="paypal-button-container@(Model.ProductId > 0 ? $"-{Model.ProductId}" : null)"></div>
     </div>
 }
 
@@ -33,7 +33,7 @@
             }
         });
         if (paymentForm) {
-            paymentForm.render('#paypal-button-container');
+            paymentForm.render('#paypal-button-container@(Model.ProductId > 0 ? $"-{Model.ProductId}" : null)');
         }
     });
 </script>

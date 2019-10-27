@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nop.Core;
 using Nop.Plugin.Payments.PayPalSmartPaymentButtons.Models;
 using Nop.Plugin.Payments.PayPalSmartPaymentButtons.Services;
+using Nop.Services.Payments;
 using Nop.Web.Framework.Components;
 using Nop.Web.Framework.Infrastructure;
 
@@ -14,14 +16,23 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
     {
         #region Fields
 
+        private readonly IPaymentPluginManager _paymentPluginManager;
+        private readonly IStoreContext _storeContext;
+        private readonly IWorkContext _workContext;
         private readonly ServiceManager _serviceManager;
 
         #endregion
 
         #region Ctor
 
-        public ScriptViewComponent(ServiceManager serviceManager)
+        public ScriptViewComponent(IPaymentPluginManager paymentPluginManager,
+            IStoreContext storeContext,
+            IWorkContext workContext,
+            ServiceManager serviceManager)
         {
+            _paymentPluginManager = paymentPluginManager;
+            _storeContext = storeContext;
+            _workContext = workContext;
             _serviceManager = serviceManager;
         }
 
@@ -37,6 +48,9 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
         /// <returns>View component result</returns>
         public IViewComponentResult Invoke(string widgetZone, object additionalData)
         {
+            if (!_paymentPluginManager.IsPluginActive(Defaults.SystemName, _workContext.CurrentCustomer, _storeContext.CurrentStore.Id))
+                return Content(string.Empty);
+
             if (!widgetZone.Equals(PublicWidgetZones.CheckoutPaymentInfoTop) &&
                 !widgetZone.Equals(PublicWidgetZones.OpcContentBefore) &&
                 !widgetZone.Equals(PublicWidgetZones.ProductDetailsTop) &&
