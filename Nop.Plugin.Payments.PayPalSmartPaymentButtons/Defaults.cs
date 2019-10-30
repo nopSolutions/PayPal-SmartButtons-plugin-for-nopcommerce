@@ -68,7 +68,7 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons
         /// </summary>
         public static Dictionary<int, string> AvailableButtonsWidgetZones => new Dictionary<int, string>
         {
-            [1] = PublicWidgetZones.ProductDetailsAddInfo,
+            //[1] = PublicWidgetZones.ProductDetailsAddInfo, //PayPal asked for now to remove the buttons from the product details page, well ok.
             [2] = PublicWidgetZones.OrderSummaryContentAfter,
             [3] = PublicWidgetZones.HeaderLinksBefore,
             [4] = PublicWidgetZones.Footer,
