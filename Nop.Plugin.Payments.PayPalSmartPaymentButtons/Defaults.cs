@@ -22,7 +22,7 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons
         /// <summary>
         /// Gets the nopCommerce partner code
         /// </summary>
-        public static string PartnerCode => "nopCommerce_SP";
+        public static string PartnerCode => "NOP_Cart_SPB";
 
         /// <summary>
         /// Gets the configuration route name
