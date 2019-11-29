@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Nop.Core;
 using Nop.Services.Payments;
 using Nop.Web.Framework.Components;
@@ -53,11 +55,13 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
             if (!_settings.ButtonsWidgetZones.Contains(widgetZone))
                 return Content(string.Empty);
 
-            if (widgetZone.Equals(PublicWidgetZones.ProductDetailsAddInfo) ||
-                widgetZone.Equals(PublicWidgetZones.OrderSummaryContentAfter))
+            if (widgetZone.Equals(PublicWidgetZones.ProductDetailsAddInfo) && additionalData is ProductDetailsModel.AddToCartModel model)
+                return View("~/Plugins/Payments.PayPalSmartPaymentButtons/Views/Buttons.cshtml", (widgetZone, model.ProductId));
+
+            if (widgetZone.Equals(PublicWidgetZones.OrderSummaryContentAfter) &&
+                RouteData.Routers.OfType<INamedRouter>().Any(route => route.Name.Equals(Defaults.ShoppingCartRouteName)))
             {
-                var productId = (additionalData is ProductDetailsModel.AddToCartModel model) ? model.ProductId : 0;
-                return View("~/Plugins/Payments.PayPalSmartPaymentButtons/Views/Buttons.cshtml", (widgetZone, productId));
+                return View("~/Plugins/Payments.PayPalSmartPaymentButtons/Views/Buttons.cshtml", (widgetZone, 0));
             }
 
             if (widgetZone.Equals(PublicWidgetZones.HeaderLinksBefore) ||

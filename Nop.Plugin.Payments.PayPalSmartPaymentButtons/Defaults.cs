@@ -40,6 +40,11 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons
         public static string OnePageCheckoutRouteName => "CheckoutOnePage";
 
         /// <summary>
+        /// Gets the shopping cart route name
+        /// </summary>
+        public static string ShoppingCartRouteName => "ShoppingCart";
+
+        /// <summary>
         /// Gets the session key to get process payment request
         /// </summary>
         public static string PaymentRequestSessionKey => "OrderPaymentInfo";
