@@ -297,7 +297,12 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Services
                 }
             };
             if (!string.IsNullOrEmpty(billingAddress.PhoneNumber))
-                orderDetails.Payer.PhoneWithType = new PhoneWithType { PhoneNumber = new Phone { NationalNumber = billingAddress.PhoneNumber } };
+            {
+                //paypal expects Minimum length: 1, Maximum length: 14, Pattern: ^[0 - 9]{ 1,14}?$
+                var numericPhone = CommonHelper.EnsureNumericOnly(billingAddress.PhoneNumber);
+                var validatedPhone = CommonHelper.EnsureMaximumLength(numericPhone, 14);
+                orderDetails.Payer.PhoneWithType = new PhoneWithType { PhoneNumber = new Phone { NationalNumber = validatedPhone } };
+            }
 
             //prepare purchase unit details
             var shippingPlugins = _shippingPluginManager.LoadActivePlugins(_workContext.CurrentCustomer, _storeContext.CurrentStore.Id);
