@@ -348,7 +348,8 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Services
                     Quantity = item.Quantity.ToString(),
                     Category = ((item.Product?.IsDownload ?? false) ? ItemCategoryType.Digital_goods : ItemCategoryType.Physical_goods)
                         .ToString().ToUpper(),
-                    UnitAmount = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = itemPrice.ToString("F") }
+                    UnitAmount = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = $"{itemPrice:N2}"
+                    }
                 };
             }).ToList();
 
@@ -367,7 +368,7 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Services
                     Name = CommonHelper.EnsureMaximumLength(value.CheckoutAttribute.Name, 127),
                     Description = CommonHelper.EnsureMaximumLength($"{value.CheckoutAttribute.Name} - {value.Name}", 127),
                     Quantity = 1.ToString(),
-                    UnitAmount = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = attributePrice.ToString("F") }
+                    UnitAmount = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = $"{attributePrice:N2}" }
                 });
             }
 
@@ -377,13 +378,13 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Services
             purchaseUnit.AmountWithBreakdown = new AmountWithBreakdown
             {
                 CurrencyCode = currency,
-                Value = orderTotal.ToString("F"),
+                Value = $"{orderTotal:N2}",
                 AmountBreakdown = new AmountBreakdown
                 {
-                    ItemTotal = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = itemTotal.ToString("F") },
-                    TaxTotal = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = taxTotal.ToString("F") },
-                    Shipping = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = shippingTotal.ToString("F") },
-                    Discount = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = discountTotal.ToString("F") }
+                    ItemTotal = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = $"{itemTotal:N2}" },
+                    TaxTotal = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = $"{taxTotal:N2}" },
+                    Shipping = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = $"{shippingTotal:N2}" },
+                    Discount = new PayPalCheckoutSdk.Orders.Money { CurrencyCode = currency, Value = $"{discountTotal:N2}" }
                 }
             };
 
@@ -452,7 +453,7 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Services
             var request = new CapturesRefundRequest(captureId);
             var refundRequest = new RefundRequest();
             if (amount.HasValue)
-                refundRequest.Amount = new PayPalCheckoutSdk.Payments.Money { CurrencyCode = currency, Value = amount.Value.ToString("F") };
+                refundRequest.Amount = new PayPalCheckoutSdk.Payments.Money { CurrencyCode = currency, Value = $"{amount.Value:N2}" };
             request.RequestBody(refundRequest);
             return HandleRequest<PayPalHttpClient, CapturesRefundRequest, PayPalCheckoutSdk.Payments.Refund>(_client, request);
         }
