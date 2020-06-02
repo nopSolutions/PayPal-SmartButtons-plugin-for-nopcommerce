@@ -1,19 +1,18 @@
-﻿using System.Linq;
+﻿using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Nop.Core;
 using Nop.Services.Payments;
 using Nop.Web.Framework.Components;
 using Nop.Web.Framework.Infrastructure;
-using Nop.Web.Models.Catalog;
 
 namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
 {
     /// <summary>
-    /// Represents the view component to display logo and buttons
+    /// Represents the view component to display logo
     /// </summary>
-    [ViewComponent(Name = Defaults.BUTTONS_VIEW_COMPONENT_NAME)]
-    public class LogoAndButtonsViewComponent : NopViewComponent
+    [ViewComponent(Name = Defaults.LOGO_VIEW_COMPONENT_NAME)]
+    public class LogoViewComponent : NopViewComponent
     {
         #region Fields
 
@@ -26,7 +25,7 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
 
         #region Ctor
 
-        public LogoAndButtonsViewComponent(IPaymentPluginManager paymentPluginManager,
+        public LogoViewComponent(IPaymentPluginManager paymentPluginManager,
             IStoreContext storeContext,
             IWorkContext workContext,
             PayPalSmartPaymentButtonsSettings settings)
@@ -52,25 +51,13 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
             if (!_paymentPluginManager.IsPluginActive(Defaults.SystemName, _workContext.CurrentCustomer, _storeContext.CurrentStore.Id))
                 return Content(string.Empty);
 
-            if (!_settings.ButtonsWidgetZones.Contains(widgetZone))
-                return Content(string.Empty);
+            var script = widgetZone.Equals(PublicWidgetZones.HeaderLinksBefore) && _settings.DisplayLogoInHeaderLinks
+                ? _settings.LogoInHeaderLinks
+                : (widgetZone.Equals(PublicWidgetZones.Footer) && _settings.DisplayLogoInFooter
+                ? _settings.LogoInFooter
+                : null);
 
-            if (widgetZone.Equals(PublicWidgetZones.ProductDetailsAddInfo) && additionalData is ProductDetailsModel.AddToCartModel model)
-                return View("~/Plugins/Payments.PayPalSmartPaymentButtons/Views/Buttons.cshtml", (widgetZone, model.ProductId));
-
-            if (widgetZone.Equals(PublicWidgetZones.OrderSummaryContentAfter) &&
-                RouteData.Routers.OfType<INamedRouter>().Any(route => route.Name.Equals(Defaults.ShoppingCartRouteName)))
-            {
-                return View("~/Plugins/Payments.PayPalSmartPaymentButtons/Views/Buttons.cshtml", (widgetZone, 0));
-            }
-
-            if (widgetZone.Equals(PublicWidgetZones.HeaderLinksBefore) ||
-                widgetZone.Equals(PublicWidgetZones.Footer))
-            {
-                return View("~/Plugins/Payments.PayPalSmartPaymentButtons/Views/Logo.cshtml", widgetZone);
-            }
-
-            return Content(string.Empty);
+            return new HtmlContentViewComponentResult(new HtmlString(script ?? string.Empty));
         }
 
         #endregion

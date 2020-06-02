@@ -1,10 +1,12 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
 using Nop.Core.Http.Extensions;
 using Nop.Plugin.Payments.PayPalSmartPaymentButtons.Models;
 using Nop.Plugin.Payments.PayPalSmartPaymentButtons.Services;
 using Nop.Services.Localization;
+using Nop.Services.Messages;
 using Nop.Services.Payments;
 using Nop.Web.Framework.Components;
 
@@ -19,7 +21,10 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
         #region Fields
 
         private readonly ILocalizationService _localizationService;
+        private readonly INotificationService _notificationService;
+        private readonly OrderSettings _orderSettings;
         private readonly PaymentSettings _paymentSettings;
+        private readonly PayPalSmartPaymentButtonsSettings _settings;
         private readonly ServiceManager _serviceManager;
 
         #endregion
@@ -27,11 +32,17 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
         #region Ctor
 
         public PaymentInfoViewComponent(ILocalizationService localizationService,
+            INotificationService notificationService,
+            OrderSettings orderSettings,
             PaymentSettings paymentSettings,
+            PayPalSmartPaymentButtonsSettings settings,
             ServiceManager serviceManager)
         {
             _localizationService = localizationService;
+            _notificationService = notificationService;
+            _orderSettings = orderSettings;
             _paymentSettings = paymentSettings;
+            _settings = settings;
             _serviceManager = serviceManager;
         }
 
@@ -88,7 +99,7 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
             GenerateOrderGuid(paymentRequest);
 
             //try to create an order
-            var (order, error) = _serviceManager.CreateOrder(paymentRequest.OrderGuid);
+            var (order, errorMessage) = _serviceManager.CreateOrder(_settings, paymentRequest.OrderGuid);
             if (order != null)
             {
                 model.OrderId = order.Id;
@@ -96,8 +107,14 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
                 //save order details for future using
                 paymentRequest.CustomValues.Add(_localizationService.GetResource("Plugins.Payments.PayPalSmartPaymentButtons.OrderId"), order.Id);
             }
-            else if (!string.IsNullOrEmpty(error))
-                model.Errors = error;
+            else if (!string.IsNullOrEmpty(errorMessage))
+            {
+                model.Errors = errorMessage;
+                if (_orderSettings.OnePageCheckoutEnabled)
+                    ModelState.AddModelError(string.Empty, errorMessage);
+                else
+                    _notificationService.ErrorNotification(errorMessage);
+            }
 
             HttpContext.Session.Set(Defaults.PaymentRequestSessionKey, paymentRequest);
 

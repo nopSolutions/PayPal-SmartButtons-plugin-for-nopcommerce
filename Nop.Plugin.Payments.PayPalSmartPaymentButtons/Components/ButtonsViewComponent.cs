@@ -1,21 +1,19 @@
 ﻿using System.Linq;
-using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.AspNetCore.Routing;
 using Nop.Core;
-using Nop.Plugin.Payments.PayPalSmartPaymentButtons.Services;
 using Nop.Services.Payments;
 using Nop.Web.Framework.Components;
 using Nop.Web.Framework.Infrastructure;
+using Nop.Web.Models.Catalog;
 
 namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
 {
     /// <summary>
-    /// Represents the view component to add script to pages
+    /// Represents the view component to display buttons
     /// </summary>
-    [ViewComponent(Name = Defaults.SCRIPT_VIEW_COMPONENT_NAME)]
-    public class ScriptViewComponent : NopViewComponent
+    [ViewComponent(Name = Defaults.BUTTONS_VIEW_COMPONENT_NAME)]
+    public class ButtonsViewComponent : NopViewComponent
     {
         #region Fields
 
@@ -23,23 +21,20 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
         private readonly IStoreContext _storeContext;
         private readonly IWorkContext _workContext;
         private readonly PayPalSmartPaymentButtonsSettings _settings;
-        private readonly ServiceManager _serviceManager;
 
         #endregion
 
         #region Ctor
 
-        public ScriptViewComponent(IPaymentPluginManager paymentPluginManager,
+        public ButtonsViewComponent(IPaymentPluginManager paymentPluginManager,
             IStoreContext storeContext,
             IWorkContext workContext,
-            PayPalSmartPaymentButtonsSettings settings,
-            ServiceManager serviceManager)
+            PayPalSmartPaymentButtonsSettings settings)
         {
             _paymentPluginManager = paymentPluginManager;
             _storeContext = storeContext;
             _workContext = workContext;
             _settings = settings;
-            _serviceManager = serviceManager;
         }
 
         #endregion
@@ -60,15 +55,10 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
             if (string.IsNullOrEmpty(_settings.ClientId))
                 return Content(string.Empty);
 
-            if (!widgetZone.Equals(PublicWidgetZones.CheckoutPaymentInfoTop) &&
-                !widgetZone.Equals(PublicWidgetZones.OpcContentBefore) &&
-                !widgetZone.Equals(PublicWidgetZones.ProductDetailsTop) &&
-                !widgetZone.Equals(PublicWidgetZones.OrderSummaryContentBefore))
-            {
+            if (!widgetZone.Equals(PublicWidgetZones.ProductDetailsAddInfo) && !widgetZone.Equals(PublicWidgetZones.OrderSummaryContentAfter))
                 return Content(string.Empty);
-            }
 
-            if (widgetZone.Equals(PublicWidgetZones.OrderSummaryContentBefore))
+            if (widgetZone.Equals(PublicWidgetZones.OrderSummaryContentAfter))
             {
                 if (!_settings.DisplayButtonsOnShoppingCart)
                     return Content(string.Empty);
@@ -77,11 +67,11 @@ namespace Nop.Plugin.Payments.PayPalSmartPaymentButtons.Components
                     return Content(string.Empty);
             }
 
-            if (widgetZone.Equals(PublicWidgetZones.ProductDetailsTop) && !_settings.DisplayButtonsOnProductDetails)
+            if (widgetZone.Equals(PublicWidgetZones.ProductDetailsAddInfo) && !_settings.DisplayButtonsOnProductDetails)
                 return Content(string.Empty);
 
-            var (script, _) = _serviceManager.GetScript(_settings);
-            return new HtmlContentViewComponentResult(new HtmlString(script ?? string.Empty));
+            var productId = additionalData is ProductDetailsModel.AddToCartModel model ? model.ProductId : 0;
+            return View("~/Plugins/Payments.PayPalSmartPaymentButtons/Views/Buttons.cshtml", (widgetZone, productId));
         }
 
         #endregion
