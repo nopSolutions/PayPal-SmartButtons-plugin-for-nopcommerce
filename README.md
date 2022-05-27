@@ -5,4 +5,4 @@ nopCommerce site: [https://www.nopcommerce.com](https://www.nopcommerce.com)
 
 Listing on nopCommerce "extensions and themes" catalog: [https://www.nopcommerce.com/paypal-smart-payment-buttons](https://www.nopcommerce.com/paypal-smart-payment-buttons)
 
-PayPal site: [https://www.paypal.com/](https://www.paypal.com/)
+PayPal site: [https://www.paypal.com/](https://www.paypal.com/?partner_id=9JJPJNNPQ7PZ8)
